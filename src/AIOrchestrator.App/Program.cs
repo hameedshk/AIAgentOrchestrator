@@ -1,4 +1,5 @@
-﻿using AIOrchestrator.App.Startup;
+﻿using AIOrchestrator.App.Security;
+using AIOrchestrator.App.Startup;
 using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,9 @@ var schedulerStateDir = Path.Combine(
 builder.Services.ConfigureAIOrchestratorServices(schedulerStateDir);
 
 var app = builder.Build();
+
+// Add Bearer token auth middleware early in pipeline
+app.UseMiddleware<BearerTokenAuthMiddleware>();
 
 app.UseRouting();
 app.MapControllers();

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using AIOrchestrator.App.DependencyInjection;
+using AIOrchestrator.App.Security;
 using AIOrchestrator.CliRunner.DependencyInjection;
 
 namespace AIOrchestrator.App.Startup;
@@ -21,6 +22,9 @@ public static class ServiceConfiguration
 
         // Phase 9: Engine
         services.AddEngine();
+
+        // Phase 10: Security
+        services.AddSingleton<ITokenStore, InMemoryTokenStore>();
 
         // API Controllers
         services.AddControllers();
