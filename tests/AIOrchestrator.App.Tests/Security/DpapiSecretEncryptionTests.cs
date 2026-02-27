@@ -30,11 +30,11 @@ namespace AIOrchestrator.App.Tests.Security
         }
 
         [Fact]
-        public void Decrypt_InvalidData_ThrowsException()
+        public void Decrypt_InvalidData_ThrowsInvalidOperationException()
         {
             var encryption = new DpapiSecretEncryption();
 
-            Assert.Throws<System.Security.Cryptography.CryptographicException>(() =>
+            Assert.Throws<InvalidOperationException>(() =>
             {
                 encryption.Decrypt("invalid_base64_data_!!!!");
             });

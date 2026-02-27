@@ -8,6 +8,9 @@ namespace AIOrchestrator.App.Security
     /// Windows DPAPI-based secret encryption. Secrets are encrypted using the current Windows user context.
     /// This service is Windows-only and suitable for local-first execution.
     /// </summary>
+    /// <remarks>
+    /// ProtectedData.Protect and Unprotect are thread-safe. No synchronization needed.
+    /// </remarks>
     public class DpapiSecretEncryption : ISecretEncryption
     {
         private const DataProtectionScope _scope = DataProtectionScope.CurrentUser;
@@ -35,6 +38,9 @@ namespace AIOrchestrator.App.Security
         /// <summary>
         /// Decrypt DPAPI-encrypted ciphertext.
         /// </summary>
+        /// <param name="ciphertext">The encrypted text in base64 format</param>
+        /// <returns>The decrypted plaintext</returns>
+        /// <exception cref="InvalidOperationException">Thrown when decryption fails due to invalid format or DPAPI error</exception>
         public string Decrypt(string ciphertext)
         {
             if (string.IsNullOrEmpty(ciphertext))
@@ -48,11 +54,11 @@ namespace AIOrchestrator.App.Security
             }
             catch (FormatException ex)
             {
-                throw new CryptographicException("Invalid base64 format", ex);
+                throw new InvalidOperationException("Invalid base64 format in encrypted data", ex);
             }
-            catch (CryptographicException)
+            catch (CryptographicException ex)
             {
-                throw;
+                throw new InvalidOperationException("DPAPI decryption failed", ex);
             }
         }
     }
