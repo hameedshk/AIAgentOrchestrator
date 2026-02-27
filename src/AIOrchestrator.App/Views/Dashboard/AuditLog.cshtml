@@ -1,0 +1,63 @@
+@{
+    ViewData["Title"] = "Audit Log";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">API Operations Audit Trail</div>
+</div>
+
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Method</th>
+                <th>Endpoint</th>
+                <th>Device</th>
+                <th>IP Address</th>
+                <th>Status</th>
+                <th>Response Time</th>
+            </tr>
+        </thead>
+        <tbody id="audit-log-table">
+            <tr>
+                <td colspan="7" style="text-align: center; color: #999;">Loading audit log...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+async function loadAuditLog() {
+    try {
+        const response = await fetch('/api/logs/audit/stream', {
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            }
+        });
+        const logs = await response.json();
+
+        const table = document.getElementById('audit-log-table');
+        table.innerHTML = logs.map(log => `
+            <tr>
+                <td>${new Date(log.timestamp).toLocaleString()}</td>
+                <td><strong>${log.httpMethod}</strong></td>
+                <td><code style="background: #f5f5f5; padding: 2px 4px;">${log.requestPath}</code></td>
+                <td>${log.deviceName}</td>
+                <td>${log.ipAddress}</td>
+                <td>
+                    <span class="status-badge" style="background: ${log.responseStatusCode >= 200 && log.responseStatusCode < 300 ? '#d5f4e6' : '#fadbd8'}; color: ${log.responseStatusCode >= 200 && log.responseStatusCode < 300 ? '#27ae60' : '#e74c3c'};">
+                        ${log.responseStatusCode}
+                    </span>
+                </td>
+                <td>${log.responseTimeMs}ms</td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        console.error('Failed to load audit log:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadAuditLog);
+</script>

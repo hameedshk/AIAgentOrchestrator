@@ -1,0 +1,73 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">System Status</div>
+    <div style="display: flex; flex-wrap: wrap; padding: 15px 0;">
+        <div class="metric">
+            <span class="metric-label">Active Tasks</span>
+            <span class="metric-value" id="active-tasks">0</span>
+        </div>
+        <div class="metric">
+            <span class="metric-label">CPU Usage</span>
+            <span class="metric-value" id="cpu-usage">0%</span>
+        </div>
+        <div class="metric">
+            <span class="metric-label">Memory Usage</span>
+            <span class="metric-value" id="memory-usage">0%</span>
+        </div>
+        <div class="metric">
+            <span class="metric-label">Uptime</span>
+            <span class="metric-value" id="uptime">--</span>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">Recent Tasks</div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Task ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Progress</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody id="recent-tasks">
+            <tr>
+                <td colspan="5" style="text-align: center; color: #999;">Loading tasks...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <div class="card-header">System Health</div>
+    <div id="health-status">
+        <div class="alert alert-info">Engine Status: <strong>Running</strong></div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // Load status data
+    try {
+        const response = await fetch('/api/status', {
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            }
+        });
+        const status = await response.json();
+
+        document.getElementById('active-tasks').textContent = status.activeTaskCount || 0;
+        document.getElementById('cpu-usage').textContent = Math.round(status.cpuUsagePercent || 0) + '%';
+        document.getElementById('memory-usage').textContent = Math.round(status.memoryUsagePercent || 0) + '%';
+    } catch (error) {
+        console.error('Failed to load status:', error);
+    }
+});
+</script>

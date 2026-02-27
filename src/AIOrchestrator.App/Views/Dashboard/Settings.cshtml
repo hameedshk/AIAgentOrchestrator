@@ -1,0 +1,75 @@
+@{
+    ViewData["Title"] = "Settings";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">Engine Configuration</div>
+    <form id="settings-form">
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Execution Mode</label>
+            <select id="execution-mode" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="Safe">Safe (Manual plan approval)</option>
+                <option value="SemiAuto">Semi-Auto (Auto-execute after plan approval)</option>
+                <option value="FullAuto">Full Auto (No manual intervention)</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Max Concurrent Tasks</label>
+            <input type="number" id="max-concurrent" value="4" min="1" max="16" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Task Timeout (minutes)</label>
+            <input type="number" id="task-timeout" value="60" min="5" max="480" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-header">System Info</div>
+    <table class="table" style="margin: 0;">
+        <tbody>
+            <tr>
+                <td style="font-weight: 600;">Engine Version</td>
+                <td id="engine-version">--</td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Uptime</td>
+                <td id="engine-uptime">--</td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Total Tasks Completed</td>
+                <td id="total-tasks">--</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.getElementById('settings-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    try {
+        const response = await fetch('/api/engine/set-mode', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                mode: document.getElementById('execution-mode').value
+            })
+        });
+
+        if (response.ok) {
+            alert('Settings saved successfully');
+        }
+    } catch (error) {
+        alert('Failed to save settings: ' + error);
+    }
+});
+</script>
