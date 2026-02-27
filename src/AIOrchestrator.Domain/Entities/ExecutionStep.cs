@@ -14,6 +14,8 @@ public sealed class ExecutionStep
     public StepStatus Status { get; private set; } = StepStatus.Pending;
     public string? ActualOutput { get; private set; }
     public FailureContext? LastFailure { get; private set; }
+    public int RetryCount { get; private set; }
+    public string? LastErrorHash { get; private set; }
     public DateTimeOffset? StartedAt { get; private set; }
     public DateTimeOffset? CompletedAt { get; private set; }
 
@@ -34,5 +36,15 @@ public sealed class ExecutionStep
     {
         Status = StepStatus.Failed;
         LastFailure = failure;
+        LastErrorHash = failure.ErrorHash;
+        RetryCount++;
+    }
+
+    public void ResetForRetry()
+    {
+        Status = StepStatus.Pending;
+        ActualOutput = null;
+        StartedAt = null;
+        CompletedAt = null;
     }
 }
