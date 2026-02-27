@@ -19,6 +19,12 @@ public sealed class ExecutionStep
     public DateTimeOffset? StartedAt { get; private set; }
     public DateTimeOffset? CompletedAt { get; private set; }
 
+    /// <summary>
+    /// Marks steps that came from a revised plan via re-planning.
+    /// Used for debugging and understanding execution history.
+    /// </summary>
+    public bool IsFromReplan { get; set; } = false;
+
     public void MarkStarted()
     {
         Status = StepStatus.Running;
