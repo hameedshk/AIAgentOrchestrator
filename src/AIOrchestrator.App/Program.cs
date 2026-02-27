@@ -1,4 +1,5 @@
-﻿using AIOrchestrator.App.Logging;
+﻿using AIOrchestrator.App.Hubs;
+using AIOrchestrator.App.Logging;
 using AIOrchestrator.App.Security;
 using AIOrchestrator.App.Startup;
 using Microsoft.AspNetCore.Builder;
@@ -22,5 +23,6 @@ app.UseMiddleware<AuditLoggingMiddleware>();
 
 app.UseRouting();
 app.MapControllers();
+app.MapHub<OrchestratorHub>("/orchestrator-hub");
 
 app.Run();

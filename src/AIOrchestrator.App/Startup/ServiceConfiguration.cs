@@ -1,7 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using AIOrchestrator.App.DependencyInjection;
+using AIOrchestrator.App.Hubs;
 using AIOrchestrator.App.Logging;
 using AIOrchestrator.App.Security;
+using AIOrchestrator.App.Services;
 using AIOrchestrator.CliRunner.DependencyInjection;
 
 namespace AIOrchestrator.App.Startup;
@@ -29,6 +31,10 @@ public static class ServiceConfiguration
 
         // Phase 10: Audit Logging
         services.AddSingleton<AuditLogger>();
+
+        // Phase 10: SignalR for Real-Time Updates
+        services.AddSignalR();
+        services.AddSingleton<HubConnectionManager>();
 
         // API Controllers
         services.AddControllers();

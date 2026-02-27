@@ -21,12 +21,30 @@ async function initializeSignalR() {
             updateTaskInUI(taskId, newState);
         });
 
-        signalRConnection.on('StepCompleted', (taskId, stepIndex) => {
-            console.log(`Step ${stepIndex} completed for task ${taskId}`);
+        signalRConnection.on('StepCompleted', (taskId, stepIndex, success) => {
+            console.log(`Step ${stepIndex} completed for task ${taskId}. Success: ${success}`);
+            showAlert(success ? 'success' : 'warning', `Step ${stepIndex} completed for task ${taskId}`);
         });
 
-        signalRConnection.on('ResourceAlert', (message) => {
-            showAlert('warning', message);
+        signalRConnection.on('ResourceAlert', (message, severity) => {
+            console.log(`Resource alert (${severity}): ${message}`);
+            showAlert(severity || 'warning', message);
+        });
+
+        signalRConnection.on('PlanReady', (taskId, planJson) => {
+            console.log(`Plan ready for task ${taskId}`);
+            showAlert('info', `Plan is ready for task ${taskId}. Click to review.`);
+        });
+
+        signalRConnection.on('ReplanTriggered', (taskId) => {
+            console.log(`Re-planning triggered for task ${taskId}`);
+            showAlert('warning', `Re-planning has been triggered for task ${taskId}`);
+        });
+
+        signalRConnection.on('TaskCompleted', (taskId, success) => {
+            console.log(`Task ${taskId} completed. Success: ${success}`);
+            showAlert(success ? 'success' : 'error', `Task ${taskId} has been completed`);
+            updateTaskInUI(taskId, success ? 'Completed' : 'Failed');
         });
 
         await signalRConnection.start();
