@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using AIOrchestrator.App.DependencyInjection;
+using AIOrchestrator.App.Health;
 using AIOrchestrator.App.Hubs;
 using AIOrchestrator.App.Logging;
 using AIOrchestrator.App.Security;
@@ -35,6 +36,10 @@ public static class ServiceConfiguration
         // Phase 10: SignalR for Real-Time Updates
         services.AddSignalR();
         services.AddSingleton<HubConnectionManager>();
+
+        // Phase 10: Health Checks
+        services.AddHealthChecks()
+            .AddCheck<EngineHealthCheck>("engine");
 
         // API Controllers
         services.AddControllers();

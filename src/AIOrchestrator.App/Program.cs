@@ -22,7 +22,13 @@ app.UseMiddleware<BearerTokenAuthMiddleware>();
 app.UseMiddleware<AuditLoggingMiddleware>();
 
 app.UseRouting();
-app.MapControllers();
-app.MapHub<OrchestratorHub>("/orchestrator-hub");
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHub<OrchestratorHub>("/orchestrator-hub");
+    endpoints.MapHealthChecks("/health");
+    endpoints.MapHealthChecks("/api/health");
+});
 
 app.Run();
