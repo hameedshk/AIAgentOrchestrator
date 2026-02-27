@@ -11,7 +11,7 @@ namespace AIOrchestrator.App.Security
         /// <param name="token">The token to validate</param>
         /// <param name="deviceName">The device name associated with the token, if valid</param>
         /// <returns>True if token is valid, false otherwise</returns>
-        bool ValidateToken(string token, out string deviceName);
+        bool ValidateToken(string? token, out string? deviceName);
 
         /// <summary>
         /// Store a token with an associated device name.

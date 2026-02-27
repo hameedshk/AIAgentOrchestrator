@@ -7,24 +7,38 @@ namespace AIOrchestrator.App.Security
     /// </summary>
     public class AuthenticationContext
     {
-        public string Token { get; set; }
+        /// <summary>
+        /// The authenticated device name.
+        /// </summary>
         public string DeviceName { get; set; }
+
+        /// <summary>
+        /// When the device was authenticated.
+        /// </summary>
         public DateTimeOffset AuthenticatedAt { get; set; }
+
+        /// <summary>
+        /// Remote IP address of the client.
+        /// </summary>
         public string IpAddress { get; set; }
 
+        /// <summary>
+        /// Extract authentication context from HttpContext items.
+        /// </summary>
         public static AuthenticationContext FromHttpContext(Microsoft.AspNetCore.Http.HttpContext context)
         {
-            if (!context.Items.TryGetValue("Token", out var token) ||
-                !context.Items.TryGetValue("DeviceName", out var deviceName))
+            if (context == null) return null;
+
+            if (!context.Items.TryGetValue("DeviceName", out var deviceName) ||
+                !context.Items.TryGetValue("AuthenticatedAt", out var authenticatedAt))
             {
                 return null;
             }
 
             return new AuthenticationContext
             {
-                Token = (string)token,
                 DeviceName = (string)deviceName,
-                AuthenticatedAt = DateTimeOffset.UtcNow,
+                AuthenticatedAt = (DateTimeOffset)authenticatedAt,
                 IpAddress = context.Connection.RemoteIpAddress?.ToString()
             };
         }

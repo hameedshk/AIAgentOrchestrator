@@ -18,8 +18,17 @@ namespace AIOrchestrator.App.Security
             _next = next;
         }
 
+        /// <summary>
+        /// Validates Bearer token on incoming request and stores authentication context.
+        /// </summary>
+        /// <param name="context">The HTTP context</param>
+        /// <param name="tokenStore">Token store for validation</param>
+        /// <param name="logger">Logger instance</param>
         public async Task InvokeAsync(HttpContext context, ITokenStore tokenStore, ILogger<BearerTokenAuthMiddleware> logger = null)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (tokenStore == null) throw new ArgumentNullException(nameof(tokenStore));
+
             // Skip auth for health check endpoints
             if (context.Request.Path.StartsWithSegments("/health") ||
                 context.Request.Path.StartsWithSegments("/status"))
@@ -38,9 +47,19 @@ namespace AIOrchestrator.App.Security
                 return;
             }
 
+            // Validate header length before extracting token
+            if (authHeader.Length <= "Bearer ".Length)
+            {
+                logger?.LogWarning("Request rejected: invalid Bearer token format from {RemoteIp}", context.Connection.RemoteIpAddress);
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await context.Response.WriteAsJsonAsync(new { error = "Invalid Authorization header format" });
+                return;
+            }
+
             var token = authHeader.Substring("Bearer ".Length).Trim();
 
-            if (!tokenStore.ValidateToken(token, out var deviceName))
+            // Validate token is not empty after trimming
+            if (string.IsNullOrWhiteSpace(token) || !tokenStore.ValidateToken(token, out var deviceName))
             {
                 logger?.LogWarning("Request rejected: invalid Bearer token from {RemoteIp}", context.Connection.RemoteIpAddress);
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -48,9 +67,9 @@ namespace AIOrchestrator.App.Security
                 return;
             }
 
-            // Store device context for logging
+            // Store authentication context for logging (NOT the token itself)
             context.Items["DeviceName"] = deviceName;
-            context.Items["Token"] = token;
+            context.Items["AuthenticatedAt"] = DateTimeOffset.UtcNow;
 
             logger?.LogInformation("Request authenticated for device {DeviceName}", deviceName);
             await _next(context);
