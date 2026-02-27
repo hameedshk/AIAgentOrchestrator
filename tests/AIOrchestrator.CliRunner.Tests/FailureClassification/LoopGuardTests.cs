@@ -16,14 +16,15 @@ public class LoopGuardTests
         var maxRetriesPerStep = 3;
 
         // Act & Assert
-        _guard.CanRetry(taskId, stepIndex, retryCount: 0, errorHash: "abc", maxRetriesPerStep, maxLoopsPerTask: 10)
+        // Use different error hashes for each retry to isolate maxRetriesPerStep testing
+        _guard.CanRetry(taskId, stepIndex, retryCount: 0, errorHash: "hash0", maxRetriesPerStep, maxLoopsPerTask: 10)
             .Should().BeTrue();
-        _guard.CanRetry(taskId, stepIndex, retryCount: 1, errorHash: "abc", maxRetriesPerStep, maxLoopsPerTask: 10)
+        _guard.CanRetry(taskId, stepIndex, retryCount: 1, errorHash: "hash1", maxRetriesPerStep, maxLoopsPerTask: 10)
             .Should().BeTrue();
-        _guard.CanRetry(taskId, stepIndex, retryCount: 2, errorHash: "abc", maxRetriesPerStep, maxLoopsPerTask: 10)
+        _guard.CanRetry(taskId, stepIndex, retryCount: 2, errorHash: "hash2", maxRetriesPerStep, maxLoopsPerTask: 10)
             .Should().BeTrue();
-        _guard.CanRetry(taskId, stepIndex, retryCount: 3, errorHash: "abc", maxRetriesPerStep, maxLoopsPerTask: 10)
-            .Should().BeFalse("at limit");
+        _guard.CanRetry(taskId, stepIndex, retryCount: 3, errorHash: "hash3", maxRetriesPerStep, maxLoopsPerTask: 10)
+            .Should().BeFalse("at maxRetriesPerStep limit");
     }
 
     [Fact]
