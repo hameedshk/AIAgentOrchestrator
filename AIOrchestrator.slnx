@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AIOrchestrator.App/AIOrchestrator.App.csproj" />
+    <Project Path="src/AIOrchestrator.CliRunner/AIOrchestrator.CliRunner.csproj" />
+    <Project Path="src/AIOrchestrator.Domain/AIOrchestrator.Domain.csproj" />
+    <Project Path="src/AIOrchestrator.Persistence/AIOrchestrator.Persistence.csproj" />
+    <Project Path="src/AIOrchestrator.Planner/AIOrchestrator.Planner.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AIOrchestrator.CliRunner.Tests/AIOrchestrator.CliRunner.Tests.csproj" />
+    <Project Path="tests/AIOrchestrator.Domain.Tests/AIOrchestrator.Domain.Tests.csproj" />
+    <Project Path="tests/AIOrchestrator.Persistence.Tests/AIOrchestrator.Persistence.Tests.csproj" />
+    <Project Path="tests/AIOrchestrator.Planner.Tests/AIOrchestrator.Planner.Tests.csproj" />
+  </Folder>
+</Solution>

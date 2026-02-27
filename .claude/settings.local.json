@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(dotnet:*)",
+      "Bash(where.exe dotnet:*)",
+      "Bash(\"/c/Program Files/dotnet/dotnet.exe\":*)",
+      "Bash(__NEW_LINE_733d63105ae0ba1e__ cd:*)",
+      "Bash(ls:*)",
+      "Bash(__NEW_LINE_710a32e464c14ee8__ cd:*)",
+      "Bash(__NEW_LINE_81fe8ec4e6c31e20__:*)"
+    ]
+  }
+}
