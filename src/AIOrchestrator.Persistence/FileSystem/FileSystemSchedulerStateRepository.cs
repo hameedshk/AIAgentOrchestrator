@@ -25,7 +25,7 @@ public class FileSystemSchedulerStateRepository : ISchedulerStateRepository
 
         if (File.Exists(_stateFilePath))
             File.Delete(_stateFilePath);
-        File.Move(tempFile, _stateFilePath);
+        File.Move(tempFile, _stateFilePath, overwrite: true);
     }
 
     public async Task<SchedulerStateDto?> LoadAsync()

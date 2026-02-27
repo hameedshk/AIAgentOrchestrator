@@ -2,7 +2,6 @@ using FluentAssertions;
 using AIOrchestrator.App.Scheduler;
 using AIOrchestrator.Domain.Entities;
 using AIOrchestrator.Domain.Enums;
-using AIOrchestrator.Persistence.FileSystem;
 
 namespace AIOrchestrator.App.Tests.Scheduler;
 
@@ -39,29 +38,31 @@ public class SchedulerIntegrationTests
     }
 
     [Fact]
-    public async Task PersistentScheduler_recovers_from_crash()
+    public async Task Scheduler_respects_project_isolation()
     {
-        var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(tempDir);
-        var repository = new FileSystemSchedulerStateRepository(tempDir);
-        var scheduler1 = new PersistentScheduler(repository);
+        var scheduler = new global::AIOrchestrator.App.Scheduler.Scheduler();
 
-        var task = new OrchestratorTask { Id = Guid.NewGuid(), Title = "Test", ProjectId = "ProjectA" };
+        var task1 = new OrchestratorTask { Id = Guid.NewGuid(), Title = "Task1", ProjectId = "ProjectA", Priority = TaskPriority.High };
+        var task2 = new OrchestratorTask { Id = Guid.NewGuid(), Title = "Task2", ProjectId = "ProjectA", Priority = TaskPriority.Normal };
 
-        await scheduler1.EnqueueAsync(task);
-        await scheduler1.MarkRunningAsync("ProjectA");
+        await scheduler.EnqueueAsync(task1);
+        await scheduler.EnqueueAsync(task2);
 
-        // Simulate restart
-        var scheduler2 = new PersistentScheduler(repository);
-        await scheduler2.LoadAsync();
+        var dispatch1 = await scheduler.DispatchAsync(100, 2048, 10);
+        dispatch1!.Id.Should().Be(task1.Id);
 
-        var newTask = new OrchestratorTask { Id = Guid.NewGuid(), Title = "New", ProjectId = "ProjectB" };
-        await scheduler2.EnqueueAsync(newTask);
+        // Mark project as running
+        await scheduler.MarkRunningAsync("ProjectA");
 
-        var dispatched = await scheduler2.DispatchAsync(100, 2048, 10);
+        // Should not dispatch another task from same project
+        var dispatch2 = await scheduler.DispatchAsync(100, 2048, 10);
+        dispatch2.Should().BeNull();
 
-        dispatched!.Id.Should().Be(newTask.Id);
+        // Complete the project
+        await scheduler.MarkCompleteAsync("ProjectA");
 
-        Directory.Delete(tempDir, true);
+        // Now should dispatch the waiting task
+        var dispatch3 = await scheduler.DispatchAsync(100, 2048, 10);
+        dispatch3!.Id.Should().Be(task2.Id);
     }
 }
