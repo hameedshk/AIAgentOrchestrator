@@ -33,4 +33,13 @@ public sealed class OrchestratorTaskDto
 
     [JsonPropertyName("updatedAt")]
     public DateTimeOffset? UpdatedAt { get; set; }
+
+    [JsonPropertyName("priority")]
+    public string Priority { get; set; } = "Normal";
+
+    [JsonPropertyName("queuedAt")]
+    public DateTimeOffset? QueuedAt { get; set; }
+
+    [JsonPropertyName("projectId")]
+    public string ProjectId { get; set; } = string.Empty;
 }
