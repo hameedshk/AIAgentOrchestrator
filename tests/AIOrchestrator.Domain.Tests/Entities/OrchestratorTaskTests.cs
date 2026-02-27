@@ -127,4 +127,18 @@ public class OrchestratorTaskTests
         // Assert
         task.QueuedAt.Should().BeNull();
     }
+
+    [Fact]
+    public void OrchestratorTask_tracks_project_id()
+    {
+        var projectId = "ProjectA";
+        var task = new OrchestratorTask
+        {
+            Id = Guid.NewGuid(),
+            Title = "Test",
+            ProjectId = projectId
+        };
+
+        task.ProjectId.Should().Be(projectId);
+    }
 }

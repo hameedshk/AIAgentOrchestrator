@@ -7,6 +7,7 @@ public sealed class OrchestratorTask
 {
     public Guid Id { get; init; }
     public string Title { get; init; } = string.Empty;
+    public string ProjectId { get; init; } = string.Empty;
     public string? Description { get; init; }
     public TaskState State { get; private set; } = TaskState.Created;
     public ModelType Planner { get; init; } = ModelType.Claude;
