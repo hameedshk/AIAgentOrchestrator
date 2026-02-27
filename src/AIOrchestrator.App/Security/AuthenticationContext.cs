@@ -10,7 +10,7 @@ namespace AIOrchestrator.App.Security
         /// <summary>
         /// The authenticated device name.
         /// </summary>
-        public string DeviceName { get; set; }
+        public string? DeviceName { get; set; }
 
         /// <summary>
         /// When the device was authenticated.
@@ -20,12 +20,13 @@ namespace AIOrchestrator.App.Security
         /// <summary>
         /// Remote IP address of the client.
         /// </summary>
-        public string IpAddress { get; set; }
+        public string? IpAddress { get; set; }
 
         /// <summary>
         /// Extract authentication context from HttpContext items.
         /// </summary>
-        public static AuthenticationContext FromHttpContext(Microsoft.AspNetCore.Http.HttpContext context)
+        /// <returns>AuthenticationContext if valid context found, null otherwise</returns>
+        public static AuthenticationContext? FromHttpContext(Microsoft.AspNetCore.Http.HttpContext? context)
         {
             if (context == null) return null;
 
@@ -35,10 +36,15 @@ namespace AIOrchestrator.App.Security
                 return null;
             }
 
+            if (deviceName is not string deviceNameStr || authenticatedAt is not DateTimeOffset authTime)
+            {
+                return null;
+            }
+
             return new AuthenticationContext
             {
-                DeviceName = (string)deviceName,
-                AuthenticatedAt = (DateTimeOffset)authenticatedAt,
+                DeviceName = deviceNameStr,
+                AuthenticatedAt = authTime,
                 IpAddress = context.Connection.RemoteIpAddress?.ToString()
             };
         }

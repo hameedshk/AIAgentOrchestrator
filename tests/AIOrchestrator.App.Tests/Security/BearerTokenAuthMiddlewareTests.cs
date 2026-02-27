@@ -215,7 +215,7 @@ namespace AIOrchestrator.App.Tests.Security
         [Fact]
         public void InMemoryTokenStore_HandlesConcurrentAccess()
         {
-            var store = new InMemoryTokenStore();
+            var store = new global::AIOrchestrator.App.Security.InMemoryTokenStore();
             var tasks = new List<Task>();
 
             // Concurrent stores
@@ -239,7 +239,7 @@ namespace AIOrchestrator.App.Tests.Security
         [Fact]
         public void InMemoryTokenStore_HandlesConcurrentValidation()
         {
-            var store = new InMemoryTokenStore();
+            var store = new global::AIOrchestrator.App.Security.InMemoryTokenStore();
 
             // Pre-populate with tokens
             for (int i = 0; i < 50; i++)
