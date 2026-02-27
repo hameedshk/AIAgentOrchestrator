@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using AIOrchestrator.App.DependencyInjection;
+using AIOrchestrator.App.Logging;
 using AIOrchestrator.App.Security;
 using AIOrchestrator.CliRunner.DependencyInjection;
 
@@ -25,6 +26,9 @@ public static class ServiceConfiguration
 
         // Phase 10: Security
         services.AddSingleton<ITokenStore, InMemoryTokenStore>();
+
+        // Phase 10: Audit Logging
+        services.AddSingleton<AuditLogger>();
 
         // API Controllers
         services.AddControllers();

@@ -1,4 +1,5 @@
-﻿using AIOrchestrator.App.Security;
+﻿using AIOrchestrator.App.Logging;
+using AIOrchestrator.App.Security;
 using AIOrchestrator.App.Startup;
 using Microsoft.AspNetCore.Builder;
 
@@ -15,6 +16,9 @@ var app = builder.Build();
 
 // Add Bearer token auth middleware early in pipeline
 app.UseMiddleware<BearerTokenAuthMiddleware>();
+
+// Add audit logging middleware after Bearer token auth
+app.UseMiddleware<AuditLoggingMiddleware>();
 
 app.UseRouting();
 app.MapControllers();
