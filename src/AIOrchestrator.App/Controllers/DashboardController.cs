@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 
 namespace AIOrchestrator.App.Controllers
 {
     /// <summary>
     /// Serves the web dashboard UI.
     /// All dashboard views require authentication (Bearer token).
+    /// Authentication is enforced by BearerTokenAuthMiddleware in the pipeline.
     /// </summary>
-    [Authorize]
     public class DashboardController : Controller
     {
         public IActionResult Index()

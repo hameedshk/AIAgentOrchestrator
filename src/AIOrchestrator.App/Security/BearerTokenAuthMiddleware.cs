@@ -31,6 +31,7 @@ namespace AIOrchestrator.App.Security
 
             // Skip auth for health check endpoints
             if (context.Request.Path.StartsWithSegments("/health") ||
+                context.Request.Path.StartsWithSegments("/api/health") ||
                 context.Request.Path.StartsWithSegments("/status"))
             {
                 await _next(context);

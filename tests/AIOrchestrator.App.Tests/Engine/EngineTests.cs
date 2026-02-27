@@ -52,6 +52,7 @@ public class EngineTests
         var task = new OrchestratorTask { Id = Guid.NewGuid(), Title = "Test", ProjectId = "ProjectA" };
         task.Enqueue();
         task.StartPlanning();
+        task.ApprovePlan("v1", []);
         task.StartExecuting();
 
         await engine.CompleteTaskAsync(task);

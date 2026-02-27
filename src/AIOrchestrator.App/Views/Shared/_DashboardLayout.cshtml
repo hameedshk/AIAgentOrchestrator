@@ -13,16 +13,16 @@
                 🤖 AI Orchestrator
             </div>
             <nav class="sidebar-nav">
-                <a href="@Url.Action("Index", "Dashboard")" class="@(ViewContext.RouteData.Action == "Index" ? "active" : "")">
+                <a href="@Url.Action("Index", "Dashboard")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
                     📊 Dashboard
                 </a>
-                <a href="@Url.Action("Tasks", "Dashboard")" class="@(ViewContext.RouteData.Action == "Tasks" ? "active" : "")">
+                <a href="@Url.Action("Tasks", "Dashboard")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Tasks" ? "active" : "")">
                     ✓ Tasks
                 </a>
-                <a href="@Url.Action("AuditLog", "Dashboard")" class="@(ViewContext.RouteData.Action == "AuditLog" ? "active" : "")">
+                <a href="@Url.Action("AuditLog", "Dashboard")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "AuditLog" ? "active" : "")">
                     📋 Audit Log
                 </a>
-                <a href="@Url.Action("Settings", "Dashboard")" class="@(ViewContext.RouteData.Action == "Settings" ? "active" : "")">
+                <a href="@Url.Action("Settings", "Dashboard")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Settings" ? "active" : "")">
                     ⚙️ Settings
                 </a>
             </nav>
@@ -45,7 +45,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/@aspnet/signalr@1.1.4/signalr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@latest/signalr.min.js"></script>
     <script src="~/js/dashboard.js"></script>
 </body>
 </html>

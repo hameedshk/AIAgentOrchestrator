@@ -28,7 +28,12 @@ public class EngineIntegrationTests
         var dispatched = await scheduler.DispatchAsync(100, 2048, 10);
         dispatched.Should().NotBeNull();
 
-        await engine.CompleteTaskAsync(dispatched!);
+        // Transition through proper state sequence
+        dispatched!.StartPlanning();
+        dispatched.ApprovePlan("v1", []);
+        dispatched.StartExecuting();
+
+        await engine.CompleteTaskAsync(dispatched);
         var status = await engine.GetStatusAsync();
 
         status.CompletedTasks.Should().Be(1);
