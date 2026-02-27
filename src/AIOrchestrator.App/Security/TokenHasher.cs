@@ -5,33 +5,97 @@ using System.Text;
 namespace AIOrchestrator.App.Security
 {
     /// <summary>
-    /// Hashes tokens using SHA-256 + salt for secure storage.
+    /// Hashes tokens using PBKDF2 with per-token random salt for secure storage.
     /// Tokens are never stored in plaintext.
     /// </summary>
-    public class TokenHasher
+    public class TokenHasher : ITokenHasher
     {
-        private const string _salt = "AIOrchestrator_Token_Salt_v1"; // Static salt for now; consider per-token salt for higher security
+        private const int SaltSizeBytes = 16;
+        private const int HashIterations = 10000;
+        private const int HashSizeBytes = 32;
 
         /// <summary>
-        /// Hash a token using SHA-256 + salt.
+        /// Hash a token using PBKDF2 with a random salt.
+        /// Returns a string in format "salt:hash" (hex encoded).
         /// </summary>
+        /// <param name="token">The plain token to hash.</param>
+        /// <returns>The salted hash in format "salt:hash".</returns>
+        /// <exception cref="ArgumentNullException">Thrown when token is null or empty.</exception>
         public string HashToken(string token)
         {
-            using (var sha256 = SHA256.Create())
+            if (string.IsNullOrWhiteSpace(token))
             {
-                var input = $"{token}{_salt}";
-                var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
-                return Convert.ToHexString(hash);
+                throw new ArgumentNullException(nameof(token), "Token cannot be null or empty");
+            }
+
+            // Generate a random salt
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                var salt = new byte[SaltSizeBytes];
+                rng.GetBytes(salt);
+
+                // Derive hash using PBKDF2
+                using (var pbkdf2 = new Rfc2898DeriveBytes(token, salt, HashIterations, HashAlgorithmName.SHA256))
+                {
+                    var hash = pbkdf2.GetBytes(HashSizeBytes);
+
+                    // Return salt and hash as hex string in format "salt:hash"
+                    var saltHex = Convert.ToHexString(salt);
+                    var hashHex = Convert.ToHexString(hash);
+                    return $"{saltHex}:{hashHex}";
+                }
             }
         }
 
         /// <summary>
         /// Verify a token against a stored hash.
         /// </summary>
+        /// <param name="token">The plain token to verify.</param>
+        /// <param name="storedHash">The stored hash in format "salt:hash".</param>
+        /// <returns>True if the token matches the hash, false otherwise.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when token or storedHash is null or empty.</exception>
         public bool VerifyToken(string token, string storedHash)
         {
-            var computedHash = HashToken(token);
-            return computedHash.Equals(storedHash, StringComparison.OrdinalIgnoreCase);
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                throw new ArgumentNullException(nameof(token), "Token cannot be null or empty");
+            }
+
+            if (string.IsNullOrWhiteSpace(storedHash))
+            {
+                throw new ArgumentNullException(nameof(storedHash), "Stored hash cannot be null or empty");
+            }
+
+            try
+            {
+                // Parse the stored hash format "salt:hash"
+                var parts = storedHash.Split(':');
+                if (parts.Length != 2)
+                {
+                    return false;
+                }
+
+                var saltHex = parts[0];
+                var expectedHashHex = parts[1];
+
+                // Convert hex strings back to bytes
+                var salt = Convert.FromHexString(saltHex);
+
+                // Compute hash with the stored salt
+                using (var pbkdf2 = new Rfc2898DeriveBytes(token, salt, HashIterations, HashAlgorithmName.SHA256))
+                {
+                    var computedHash = pbkdf2.GetBytes(HashSizeBytes);
+                    var computedHashHex = Convert.ToHexString(computedHash);
+
+                    // Use constant-time comparison to prevent timing attacks
+                    return computedHashHex.Equals(expectedHashHex, StringComparison.OrdinalIgnoreCase);
+                }
+            }
+            catch
+            {
+                // Return false for any parsing or verification errors
+                return false;
+            }
         }
     }
 }

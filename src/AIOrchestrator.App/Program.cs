@@ -1,6 +1,7 @@
 ﻿using AIOrchestrator.App.Startup;
+using Microsoft.AspNetCore.Builder;
 
-var builder = WebApplicationBuilder.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 var schedulerStateDir = Path.Combine(
     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),

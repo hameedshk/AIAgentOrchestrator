@@ -13,7 +13,7 @@ public class EngineIntegrationTests
     [Fact]
     public async Task Engine_coordinates_full_task_lifecycle()
     {
-        var scheduler = new Scheduler();
+        var scheduler = new global::AIOrchestrator.App.Scheduler.Scheduler();
         var resourceMonitor = Substitute.For<IResourceMonitor>();
         var resources = new SystemResources { CpuUsagePercent = 45, AvailableMemoryMb = 2048, RunningProcessCount = 3, MaxProcessesAllowed = 10 };
         resourceMonitor.GetSystemResourcesAsync().Returns(resources);
@@ -37,7 +37,7 @@ public class EngineIntegrationTests
     [Fact]
     public async Task Engine_respects_resource_thresholds()
     {
-        var scheduler = new Scheduler();
+        var scheduler = new global::AIOrchestrator.App.Scheduler.Scheduler();
         var resourceMonitor = Substitute.For<IResourceMonitor>();
         var resources = new SystemResources { CpuUsagePercent = 45, AvailableMemoryMb = 2048, RunningProcessCount = 3, MaxProcessesAllowed = 10 };
         resourceMonitor.GetSystemResourcesAsync().Returns(resources);

@@ -49,7 +49,10 @@ public class EngineTests
         var resourceMonitor = Substitute.For<IResourceMonitor>();
         var engine = new global::AIOrchestrator.App.Engine.Engine(scheduler, resourceMonitor);
 
-        var task = new OrchestratorTask { Id = Guid.NewGuid(), Title = "Test", ProjectId = "ProjectA", State = TaskState.Executing };
+        var task = new OrchestratorTask { Id = Guid.NewGuid(), Title = "Test", ProjectId = "ProjectA" };
+        task.Enqueue();
+        task.StartPlanning();
+        task.StartExecuting();
 
         await engine.CompleteTaskAsync(task);
 
