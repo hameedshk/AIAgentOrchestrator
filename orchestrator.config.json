@@ -1,0 +1,24 @@
+{
+  "StorageBasePath": "C:\\Users\\ksham\\AppData\\Local\\AIOrchestrator\\data",
+  "CliRunner": {
+    "DefaultSilenceTimeoutSeconds": 120,
+    "Models": [
+      {
+        "ModelName": "claude",
+        "BinaryPath": "claude",
+        "DefaultArgs": [],
+        "SilenceTimeoutSeconds": 120
+      },
+      {
+        "ModelName": "codex",
+        "BinaryPath": "codex",
+        "DefaultArgs": [],
+        "SilenceTimeoutSeconds": 180
+      }
+    ]
+  },
+  "Planner": {
+    "MaxPlannerRetries": 2,
+    "ModelName": "claude"
+  }
+}
