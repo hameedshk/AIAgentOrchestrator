@@ -34,16 +34,18 @@ namespace AIOrchestrator.App.Security
                 var salt = new byte[SaltSizeBytes];
                 rng.GetBytes(salt);
 
-                // Derive hash using PBKDF2
-                using (var pbkdf2 = new Rfc2898DeriveBytes(token, salt, HashIterations, HashAlgorithmName.SHA256))
-                {
-                    var hash = pbkdf2.GetBytes(HashSizeBytes);
+                // Derive hash using PBKDF2 with SHA256
+                var hash = Rfc2898DeriveBytes.Pbkdf2(
+                    token,
+                    salt,
+                    HashIterations,
+                    HashAlgorithmName.SHA256,
+                    HashSizeBytes);
 
-                    // Return salt and hash as hex string in format "salt:hash"
-                    var saltHex = Convert.ToHexString(salt);
-                    var hashHex = Convert.ToHexString(hash);
-                    return $"{saltHex}:{hashHex}";
-                }
+                // Return salt and hash as hex string in format "salt:hash"
+                var saltHex = Convert.ToHexString(salt);
+                var hashHex = Convert.ToHexString(hash);
+                return $"{saltHex}:{hashHex}";
             }
         }
 
@@ -81,15 +83,18 @@ namespace AIOrchestrator.App.Security
                 // Convert hex strings back to bytes
                 var salt = Convert.FromHexString(saltHex);
 
-                // Compute hash with the stored salt
-                using (var pbkdf2 = new Rfc2898DeriveBytes(token, salt, HashIterations, HashAlgorithmName.SHA256))
-                {
-                    var computedHash = pbkdf2.GetBytes(HashSizeBytes);
-                    var computedHashHex = Convert.ToHexString(computedHash);
+                // Compute hash with the stored salt using PBKDF2
+                var computedHash = Rfc2898DeriveBytes.Pbkdf2(
+                    token,
+                    salt,
+                    HashIterations,
+                    HashAlgorithmName.SHA256,
+                    HashSizeBytes);
 
-                    // Use constant-time comparison to prevent timing attacks
-                    return computedHashHex.Equals(expectedHashHex, StringComparison.OrdinalIgnoreCase);
-                }
+                var computedHashHex = Convert.ToHexString(computedHash);
+
+                // Use constant-time comparison to prevent timing attacks
+                return computedHashHex.Equals(expectedHashHex, StringComparison.OrdinalIgnoreCase);
             }
             catch
             {

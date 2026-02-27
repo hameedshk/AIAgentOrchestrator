@@ -17,7 +17,7 @@ namespace AIOrchestrator.App.Security
         private readonly ConcurrentDictionary<string, PairingTokenEntry> _pairingTokens;
         private readonly ITokenHasher _hasher;
         private readonly ISystemClock _clock;
-        private readonly ILogger<DevicePairingService> _logger;
+        private readonly ILogger<DevicePairingService>? _logger;
 
         /// <summary>
         /// Initializes a new instance of the DevicePairingService.
@@ -28,9 +28,9 @@ namespace AIOrchestrator.App.Security
         /// <param name="logger">Optional logger for security events.</param>
         public DevicePairingService(
             int tokenExpirationMinutes = 15,
-            ITokenHasher hasher = null,
-            ISystemClock clock = null,
-            ILogger<DevicePairingService> logger = null)
+            ITokenHasher? hasher = null,
+            ISystemClock? clock = null,
+            ILogger<DevicePairingService>? logger = null)
         {
             if (tokenExpirationMinutes <= 0)
             {
@@ -78,9 +78,11 @@ namespace AIOrchestrator.App.Security
 
             var hashedToken = _hasher.HashToken(token);
             var now = _clock.UtcNow;
+            var tokenId = Guid.NewGuid().ToString(); // Use a unique ID as the key
 
-            _pairingTokens[hashedToken] = new PairingTokenEntry
+            _pairingTokens[tokenId] = new PairingTokenEntry
             {
+                TokenHash = hashedToken,
                 DeviceName = deviceName,
                 CreatedAt = now,
                 ExpiresAt = now.AddMinutes(_tokenExpirationMinutes),
@@ -110,43 +112,51 @@ namespace AIOrchestrator.App.Security
                 throw new ArgumentNullException(nameof(deviceName), "Device name cannot be null or empty");
             }
 
-            var hashedToken = _hasher.HashToken(token);
             var now = _clock.UtcNow;
 
-            // Use TryGetValue for atomic read
-            if (!_pairingTokens.TryGetValue(hashedToken, out var entry))
+            // Search through all tokens to find a match using the hasher's VerifyToken method
+            foreach (var kvp in _pairingTokens)
             {
-                _logger?.LogWarning("Pairing validation failed: token not found");
-                return false;
+                var tokenId = kvp.Key;
+                var entry = kvp.Value;
+
+                // Verify the token against the stored hash
+                if (!_hasher.VerifyToken(token, entry.TokenHash))
+                {
+                    continue; // Not a match, try next token
+                }
+
+                // Check expiration
+                if (now > entry.ExpiresAt)
+                {
+                    _pairingTokens.TryRemove(tokenId, out _);
+                    _logger?.LogWarning("Pairing validation failed: token expired for device {DeviceName}", deviceName);
+                    return false;
+                }
+
+                // Check device name match
+                if (entry.DeviceName != deviceName)
+                {
+                    _logger?.LogWarning("Pairing validation failed: device name mismatch. Expected: {Expected}, Got: {Actual}",
+                        entry.DeviceName, deviceName);
+                    return false;
+                }
+
+                // Check if already used
+                if (entry.IsUsed)
+                {
+                    _logger?.LogWarning("Pairing validation failed: token already used for device {DeviceName}", deviceName);
+                    return false;
+                }
+
+                // Mark as used atomically
+                entry.IsUsed = true;
+                _logger?.LogInformation("Pairing token validated and marked as used for device: {DeviceName}", deviceName);
+                return true;
             }
 
-            // Check expiration
-            if (now > entry.ExpiresAt)
-            {
-                _pairingTokens.TryRemove(hashedToken, out _);
-                _logger?.LogWarning("Pairing validation failed: token expired for device {DeviceName}", deviceName);
-                return false;
-            }
-
-            // Check device name match
-            if (entry.DeviceName != deviceName)
-            {
-                _logger?.LogWarning("Pairing validation failed: device name mismatch. Expected: {Expected}, Got: {Actual}",
-                    entry.DeviceName, deviceName);
-                return false;
-            }
-
-            // Check if already used
-            if (entry.IsUsed)
-            {
-                _logger?.LogWarning("Pairing validation failed: token already used for device {DeviceName}", deviceName);
-                return false;
-            }
-
-            // Mark as used atomically
-            entry.IsUsed = true;
-            _logger?.LogInformation("Pairing token validated and marked as used for device: {DeviceName}", deviceName);
-            return true;
+            _logger?.LogWarning("Pairing validation failed: token not found");
+            return false;
         }
 
         /// <summary>
@@ -180,13 +190,31 @@ namespace AIOrchestrator.App.Security
 
         private class PairingTokenEntry
         {
+            /// <summary>
+            /// The hashed token in format "salt:hash".
+            /// </summary>
             [Required]
-            public string DeviceName { get; set; }
+            public required string TokenHash { get; set; }
 
+            /// <summary>
+            /// The device name associated with this token.
+            /// </summary>
+            [Required]
+            public required string DeviceName { get; set; }
+
+            /// <summary>
+            /// When the token was created.
+            /// </summary>
             public DateTimeOffset CreatedAt { get; set; }
 
+            /// <summary>
+            /// When the token expires.
+            /// </summary>
             public DateTimeOffset ExpiresAt { get; set; }
 
+            /// <summary>
+            /// Whether the token has been used.
+            /// </summary>
             public bool IsUsed { get; set; }
         }
     }

@@ -12,14 +12,14 @@ namespace AIOrchestrator.App.Security
         /// Gets or sets the unique identifier for the paired device.
         /// </summary>
         [Required]
-        public string DeviceId { get; set; }
+        public required string DeviceId { get; set; }
 
         /// <summary>
         /// Gets or sets the human-readable name of the device.
         /// </summary>
         [Required]
         [StringLength(256)]
-        public string DeviceName { get; set; }
+        public required string DeviceName { get; set; }
 
         /// <summary>
         /// Gets or sets the timestamp when the device was paired.

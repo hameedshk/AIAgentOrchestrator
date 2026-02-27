@@ -50,14 +50,14 @@ namespace AIOrchestrator.App.Tests.Security
             var resultBeforeExpiry = service.ValidatePairingToken(token, "TestDevice");
             Assert.True(resultBeforeExpiry);
 
-            // Advance time past expiration
-            mockClock.UtcNow.Returns(baseTime.AddMinutes(16));
-
-            // Generate a new token for validation after expiry
+            // Generate and store another token before advancing time
             var token2 = service.GeneratePairingToken();
             service.StorePairingToken(token2, "TestDevice2");
 
-            // Now validate the expired token - should fail because expiration check uses the clock
+            // Advance time past expiration (15 minutes + 1)
+            mockClock.UtcNow.Returns(baseTime.AddMinutes(16));
+
+            // Now validate the second token which should be expired
             var resultAfterExpiry = service.ValidatePairingToken(token2, "TestDevice2");
             // This should fail because the mock time has advanced past the 15-minute expiration
             Assert.False(resultAfterExpiry);
@@ -165,7 +165,9 @@ namespace AIOrchestrator.App.Tests.Security
             var service = new DevicePairingService();
             var token = service.GeneratePairingToken();
             service.StorePairingToken(token, "TestDevice");
+#pragma warning disable CS8625
             Assert.Throws<ArgumentNullException>(() => service.ValidatePairingToken(token, null));
+#pragma warning restore CS8625
         }
 
         [Fact]
