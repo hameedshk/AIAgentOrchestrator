@@ -11,7 +11,7 @@ public class SchedulerIntegrationTests
     [Fact]
     public async Task Scheduler_manages_multiple_projects_concurrently()
     {
-        var scheduler = new Scheduler();
+        var scheduler = new global::AIOrchestrator.App.Scheduler.Scheduler();
 
         var taskA = new OrchestratorTask { Id = Guid.NewGuid(), Title = "A", ProjectId = "ProjectA", Priority = TaskPriority.High };
         var taskB = new OrchestratorTask { Id = Guid.NewGuid(), Title = "B", ProjectId = "ProjectB", Priority = TaskPriority.Low };
@@ -29,9 +29,13 @@ public class SchedulerIntegrationTests
 
         var dispatch3 = await scheduler.DispatchAsync(100, 2048, 10);
 
-        dispatch1.Id.Should().Be(taskA.Id);
-        dispatch2.Id.Should().Be(taskC.Id);
-        dispatch3.Id.Should().Be(taskB.Id);
+        dispatch1.Should().NotBeNull();
+        dispatch2.Should().NotBeNull();
+        dispatch3.Should().NotBeNull();
+
+        dispatch1!.Id.Should().Be(taskA.Id);
+        dispatch2!.Id.Should().Be(taskC.Id);
+        dispatch3!.Id.Should().Be(taskB.Id);
     }
 
     [Fact]
