@@ -37,8 +37,15 @@ public class ExecutionStepTests
     public void MarkFailed_sets_Failed_status_and_captures_failure()
     {
         var step = new ExecutionStep { Index = 0, Type = StepType.Shell, Description = "Build" };
-        var failure = new FailureContext("Build error", "stderr output", ExitCode: 1,
-                                         DateTimeOffset.UtcNow, RetryAttempt: 0);
+        var failure = new FailureContext(
+            Type: FailureType.CompileError,
+            RawOutput: "Build error: syntax error",
+            ExitCode: 1,
+            ErrorHash: "hash123",
+            Retryable: false,
+            PlannerModel: ModelType.Claude,
+            ExecutorModel: ModelType.Codex,
+            OccurredAt: DateTimeOffset.UtcNow);
         step.MarkStarted();
         step.MarkFailed(failure);
         step.Status.Should().Be(StepStatus.Failed);

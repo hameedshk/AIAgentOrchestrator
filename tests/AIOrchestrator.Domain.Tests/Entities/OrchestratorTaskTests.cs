@@ -60,7 +60,15 @@ public class OrchestratorTaskTests
         var task = NewTask();
         task.Enqueue();
         task.StartPlanning();
-        var failure = new FailureContext("plan error", null, null, DateTimeOffset.UtcNow, 0);
+        var failure = new FailureContext(
+            Type: FailureType.PlanningError,
+            RawOutput: "plan error",
+            ExitCode: null,
+            ErrorHash: "hash789",
+            Retryable: false,
+            PlannerModel: ModelType.Claude,
+            ExecutorModel: null,
+            OccurredAt: DateTimeOffset.UtcNow);
         task.Fail(failure);
         task.State.Should().Be(TaskState.Failed);
         task.LastFailure.Should().Be(failure);

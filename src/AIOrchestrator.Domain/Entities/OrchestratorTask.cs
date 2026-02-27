@@ -7,6 +7,7 @@ public sealed class OrchestratorTask
 {
     public Guid Id { get; init; }
     public string Title { get; init; } = string.Empty;
+    public string? Description { get; init; }
     public TaskState State { get; private set; } = TaskState.Created;
     public ModelType Planner { get; init; } = ModelType.Claude;
     public ModelType Executor { get; init; } = ModelType.Codex;
@@ -15,6 +16,7 @@ public sealed class OrchestratorTask
     public FailureContext? LastFailure { get; private set; }
     public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedAt { get; private set; }
+    public int CurrentStepIndex { get; set; } = 0;
 
     /// <summary>
     /// Spec Section 4.5: When true, triggers Planner re-invocation on non-retryable Executor failures.

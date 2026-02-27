@@ -11,4 +11,10 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../AIOrchestrator.Domain/AIOrchestrator.Domain.csproj" />
+    <ProjectReference Include="../AIOrchestrator.CliRunner/AIOrchestrator.CliRunner.csproj" />
+    <ProjectReference Include="../AIOrchestrator.Persistence/AIOrchestrator.Persistence.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -180,22 +180,28 @@ public sealed class FileTaskRepository(TaskStorePaths paths) : ITaskRepository
     {
         return new FailureContextDto
         {
-            Reason = failure.Reason,
+            Type = failure.Type.ToString(),
             RawOutput = failure.RawOutput,
             ExitCode = failure.ExitCode,
-            OccurredAt = failure.OccurredAt,
-            RetryAttempt = failure.RetryAttempt
+            ErrorHash = failure.ErrorHash,
+            Retryable = failure.Retryable,
+            PlannerModel = failure.PlannerModel?.ToString(),
+            ExecutorModel = failure.ExecutorModel?.ToString(),
+            OccurredAt = failure.OccurredAt
         };
     }
 
     private static FailureContext MapFailureToDomain(FailureContextDto dto)
     {
         return new FailureContext(
-            dto.Reason,
-            dto.RawOutput,
-            dto.ExitCode,
-            dto.OccurredAt,
-            dto.RetryAttempt
+            Type: Enum.Parse<FailureType>(dto.Type ?? "Unknown"),
+            RawOutput: dto.RawOutput ?? "",
+            ExitCode: dto.ExitCode,
+            ErrorHash: dto.ErrorHash ?? "",
+            Retryable: dto.Retryable,
+            PlannerModel: string.IsNullOrEmpty(dto.PlannerModel) ? null : Enum.Parse<ModelType>(dto.PlannerModel),
+            ExecutorModel: string.IsNullOrEmpty(dto.ExecutorModel) ? null : Enum.Parse<ModelType>(dto.ExecutorModel),
+            OccurredAt: dto.OccurredAt
         );
     }
 }
