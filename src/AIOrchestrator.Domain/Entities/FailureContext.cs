@@ -1,9 +1,18 @@
 namespace AIOrchestrator.Domain.Entities;
 
+using AIOrchestrator.Domain.Enums;
+
+/// <summary>
+/// Captures failure context for a step execution.
+/// See spec Section 4.7 for field definitions.
+/// </summary>
 public sealed record FailureContext(
-    string Reason,
-    string? RawOutput,
+    FailureType Type,
+    string RawOutput,
     int? ExitCode,
-    DateTimeOffset OccurredAt,
-    int RetryAttempt
+    string ErrorHash,
+    bool Retryable,
+    ModelType? PlannerModel,
+    ModelType? ExecutorModel,
+    DateTimeOffset OccurredAt
 );
