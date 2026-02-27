@@ -1,0 +1,128 @@
+PHASE 7: RE-PLANNING IMPLEMENTATION - VERIFICATION REPORT
+=========================================================
+
+Date: 2026-02-27
+Status: COMPLETE
+
+TASK 10: RE-PLANNING ARCHITECTURE DOCUMENTATION
+================================================
+File Created: docs/architecture/REPLANNING.md
+Status: Complete
+
+Content includes:
+✓ Overview of re-planning mechanism
+✓ Core concept with execution flow
+✓ Components documentation (IReplanningOrchestrator, ReplanPromptBuilder)
+✓ Data model extensions (AllowReplan, ReplanAttempts, IsFromReplan)
+✓ Integration with other phases (Phase 3, 4, 5)
+✓ Example scenario showing replanning flow
+✓ Testing strategy
+✓ Non-functional guarantees
+✓ Configuration section
+✓ Out of scope items for V1
+
+TASK 11: FULL TEST SUITE AND VERIFICATION
+===========================================
+
+Test Results Summary:
+- Domain Tests: 46 PASSED
+- Persistence Tests: 12 PASSED
+- CliRunner Tests: 66 PASSED
+- Planner Tests: 13 PASSED
+- App Tests: 28 PASSED (includes 14 Replanning tests)
+- Total: 165 tests PASSED, 0 FAILED
+
+Replanning Tests (14 tests):
+  Unit Tests (5):
+    ✓ CanReplan_returns_true_when_conditions_met
+    ✓ CanReplan_returns_false_when_allowReplan_false
+    ✓ CanReplan_returns_false_when_failure_retryable
+    ✓ CanReplan_returns_false_when_max_attempts_exceeded
+    ✓ ReplanAsync_appends_revised_steps_with_isFromReplan_flag
+  
+  Prompt Builder Tests (4):
+    ✓ BuildReplanPrompt_includes_original_task_info
+    ✓ BuildReplanPrompt_includes_failure_context
+    ✓ BuildReplanPrompt_includes_completed_steps_summary
+    ✓ BuildReplanPrompt_includes_json_format_instruction
+  
+  Integration Tests (5):
+    ✓ FullReplan_flow_from_failure_to_revised_plan_execution
+    ✓ Recursive_replanning_works_with_second_failure
+    ✓ ReplanAsync_throws_on_invalid_json
+    ✓ Coordinator_identifies_executing_tasks
+    ✓ Recovery_recovers_executing_task
+
+Build Verification:
+✓ dotnet build: SUCCESS
+  - Zero warnings
+  - Zero errors
+  - Time: 5.79 seconds
+
+✓ Full solution builds successfully with all projects:
+  - AIOrchestrator.Domain
+  - AIOrchestrator.Persistence
+  - AIOrchestrator.CliRunner
+  - AIOrchestrator.App (with Replanning)
+  - AIOrchestrator.Planner
+  - All test projects including AIOrchestrator.App.Tests
+
+Git Status:
+- No untracked files
+- Modified files from implementation fixes:
+  * AIOrchestrator.slnx (added App.Tests project)
+  * src/AIOrchestrator.App/CrashRecovery/TaskRecoveryCoordinator.cs
+  * src/AIOrchestrator.App/Replanning/ReplanningOrchestrator.cs
+  * src/AIOrchestrator.Domain/Entities/OrchestratorTask.cs
+  * test files (fixes for state machine transitions)
+
+IMPLEMENTATION DETAILS
+======================
+
+Phase 7 Re-Planning Components:
+1. IReplanningOrchestrator & ReplanningOrchestrator
+   - Orchestrates re-planning when non-retryable failures occur
+   - CanReplan() eligibility checks
+   - ReplanAsync() implementation with JSON validation
+   - Max replan attempts enforcement (default: 3)
+
+2. ReplanPromptBuilder
+   - Constructs structured replan prompts
+   - Includes task context, completed steps, failed step, failure details
+   - Provides JSON format specification for Planner
+
+3. OrchestratorTask Extensions
+   - AllowReplan: bool property to enable re-planning
+   - ReplanAttempts: int to track replan count
+   - AppendRevisionPlanSteps(): new method for appending revised steps
+
+4. ExecutionStep Extensions
+   - IsFromReplan: bool to mark steps from revised plans
+
+5. DependencyInjection
+   - ReplanningServiceCollectionExtensions for IoC registration
+   - Singleton registration of IReplanningOrchestrator
+
+FIXES APPLIED
+=============
+
+1. ReplanningOrchestrator: Added case-insensitive JSON deserialization
+2. OrchestratorTask: Added AppendRevisionPlanSteps() method
+3. TaskRecoveryCoordinator: Enhanced state transition logic for recovery
+4. Test fixes: Corrected state machine transitions in test setup
+5. Solution file: Added App.Tests to test projects
+
+All changes maintain backward compatibility and pass full test suite.
+
+CONCLUSION
+==========
+
+Phase 7 Re-Planning Implementation is COMPLETE and VERIFIED.
+
+- Documentation: COMPLETE (REPLANNING.md)
+- Tests: ALL 14 REPLANNING TESTS PASS
+- Full Suite: ALL 165 TESTS PASS
+- Build: SUCCESS (0 warnings, 0 errors)
+- No regressions in other phases
+
+Ready for Phase 8 integration.

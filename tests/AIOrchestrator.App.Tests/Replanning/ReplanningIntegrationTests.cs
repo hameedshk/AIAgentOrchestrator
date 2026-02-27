@@ -54,7 +54,10 @@ public class ReplanningIntegrationTests
         };
 
         var initialSteps = new List<ExecutionStep> { step0, step1, step2 };
+        task.Enqueue();
+        task.StartPlanning();
         task.ApprovePlan("1", initialSteps);
+        task.StartExecuting();
 
         var failedStep = initialSteps[1];
         var failureContext = new FailureContext(
@@ -167,7 +170,10 @@ public class ReplanningIntegrationTests
         };
 
         var stepsAfterFirstReplan = new List<ExecutionStep> { stepsStep0, stepsStep1 };
+        task.Enqueue();
+        task.StartPlanning();
         task.ApprovePlan("1", stepsAfterFirstReplan);
+        task.StartExecuting();
 
         var secondFailedStep = stepsAfterFirstReplan[1];
         var secondFailureContext = new FailureContext(

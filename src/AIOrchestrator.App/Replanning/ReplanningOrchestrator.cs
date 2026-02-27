@@ -61,7 +61,8 @@ public sealed class ReplanningOrchestrator : IReplanningOrchestrator
         PlanDto? revisedPlan = null;
         try
         {
-            revisedPlan = JsonSerializer.Deserialize<PlanDto>(revisedPlanJson);
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            revisedPlan = JsonSerializer.Deserialize<PlanDto>(revisedPlanJson, options);
             if (revisedPlan?.Steps == null || revisedPlan.Steps.Count == 0)
                 throw new InvalidOperationException("Revised plan has no steps");
         }
@@ -71,8 +72,8 @@ public sealed class ReplanningOrchestrator : IReplanningOrchestrator
                 $"Planner produced invalid JSON during re-planning: {ex.Message}", ex);
         }
 
-        // Build new steps list: keep existing steps + add revised steps marked as from replan
-        var allSteps = new List<ExecutionStep>(task.Steps);
+        // Build revised steps marked as from replan
+        var revisedSteps = new List<ExecutionStep>();
 
         foreach (var revisedStep in revisedPlan.Steps)
         {
@@ -85,14 +86,15 @@ public sealed class ReplanningOrchestrator : IReplanningOrchestrator
                 Prompt = revisedStep.Prompt,
                 IsFromReplan = true  // Mark this step as from revised plan
             };
-            allSteps.Add(newStep);
+            revisedSteps.Add(newStep);
         }
 
-        // Update task with revised plan (using existing API pattern)
-        task.ApprovePlan("1", allSteps);
+        // Append revised steps to task without state transition
+        task.AppendRevisionPlanSteps(revisedSteps);
 
         // Update task replan counter
         task.ReplanAttempts++;
+        task.CurrentStepIndex = failedStep.Index;  // Resume from the failed step index with new plan
 
         return task;
     }

@@ -27,6 +27,10 @@ public class TaskRecoveryCoordinatorTests
             Id = Guid.NewGuid(),
             Title = "Completed Task"
         };
+        completedTask.Enqueue();
+        completedTask.StartPlanning();
+        completedTask.ApprovePlan("1", []);
+        completedTask.StartExecuting();
         completedTask.Complete();
 
         var tasks = new[] { executingTask, completedTask };

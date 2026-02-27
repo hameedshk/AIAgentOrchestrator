@@ -7,6 +7,7 @@
     <Project Path="src/AIOrchestrator.Planner/AIOrchestrator.Planner.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/AIOrchestrator.App.Tests/AIOrchestrator.App.Tests.csproj" />
     <Project Path="tests/AIOrchestrator.CliRunner.Tests/AIOrchestrator.CliRunner.Tests.csproj" />
     <Project Path="tests/AIOrchestrator.Domain.Tests/AIOrchestrator.Domain.Tests.csproj" />
     <Project Path="tests/AIOrchestrator.Persistence.Tests/AIOrchestrator.Persistence.Tests.csproj" />

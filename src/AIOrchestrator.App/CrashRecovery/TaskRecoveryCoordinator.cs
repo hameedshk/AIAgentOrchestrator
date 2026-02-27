@@ -31,7 +31,22 @@ public sealed class TaskRecoveryCoordinator : ITaskRecoveryCoordinator
             inProgressStep.ResetForRetry();
         }
 
-        task.ResumeExecuting();
+        // Transition to Executing based on current state
+        if (task.State == TaskState.Planning)
+        {
+            // If planning crashed, approve empty plan first then execute
+            if (task.Steps.Count == 0)
+            {
+                task.ApprovePlan("1", []);
+            }
+            task.StartExecuting();
+        }
+        else if (task.State != TaskState.Executing)
+        {
+            // If not Executing or Planning, try to resume (for other states that allow it)
+            task.ResumeExecuting();
+        }
+
         task.CurrentStepIndex = lastCompletedStepIndex + 1;
 
         return await Task.FromResult(task);

@@ -176,7 +176,10 @@ public class ReplanningOrchestratorTests
             Command = "invalid-command"
         };
 
+        task.Enqueue();
+        task.StartPlanning();
         task.ApprovePlan("1", new[] { completedStep, failedStep });
+        task.StartExecuting();
 
         var failureContext = new FailureContext(
             Type: FailureType.DependencyMissing,
@@ -264,7 +267,10 @@ public class ReplanningOrchestratorTests
             Command = "invalid-command"
         };
 
+        task.Enqueue();
+        task.StartPlanning();
         task.ApprovePlan("1", new[] { failedStep });
+        task.StartExecuting();
 
         var failureContext = new FailureContext(
             Type: FailureType.DependencyMissing,
