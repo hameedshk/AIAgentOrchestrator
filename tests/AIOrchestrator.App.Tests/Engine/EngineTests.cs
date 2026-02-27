@@ -41,4 +41,19 @@ public class EngineTests
         status.CpuUsagePercent.Should().Be(45);
         status.AvailableMemoryMb.Should().Be(2048);
     }
+
+    [Fact]
+    public async Task CompleteTaskAsync_marks_task_completed_and_frees_project()
+    {
+        var scheduler = Substitute.For<IScheduler>();
+        var resourceMonitor = Substitute.For<IResourceMonitor>();
+        var engine = new global::AIOrchestrator.App.Engine.Engine(scheduler, resourceMonitor);
+
+        var task = new OrchestratorTask { Id = Guid.NewGuid(), Title = "Test", ProjectId = "ProjectA", State = TaskState.Executing };
+
+        await engine.CompleteTaskAsync(task);
+
+        task.State.Should().Be(TaskState.Completed);
+        await scheduler.Received(1).MarkCompleteAsync("ProjectA");
+    }
 }

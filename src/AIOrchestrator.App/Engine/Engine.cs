@@ -123,4 +123,44 @@ public class Engine : IEngine
             await _scheduler.MarkRunningAsync(task.ProjectId);
         }
     }
+
+    /// <summary>
+    /// Mark task as completed and free up project resources.
+    /// </summary>
+    public async Task CompleteTaskAsync(OrchestratorTask task)
+    {
+        task.Complete();
+
+        lock (_tasksLock)
+        {
+            var index = _allTasks.FindIndex(t => t.Id == task.Id);
+            if (index >= 0)
+                _allTasks[index] = task;
+        }
+
+        if (!string.IsNullOrEmpty(task.ProjectId))
+        {
+            await _scheduler.MarkCompleteAsync(task.ProjectId);
+        }
+    }
+
+    /// <summary>
+    /// Mark task as failed and handle failure (retry, replan, or mark failed).
+    /// </summary>
+    public async Task FailTaskAsync(OrchestratorTask task, FailureContext failure)
+    {
+        task.Fail(failure);
+
+        lock (_tasksLock)
+        {
+            var index = _allTasks.FindIndex(t => t.Id == task.Id);
+            if (index >= 0)
+                _allTasks[index] = task;
+        }
+
+        if (!string.IsNullOrEmpty(task.ProjectId))
+        {
+            await _scheduler.MarkCompleteAsync(task.ProjectId);
+        }
+    }
 }
