@@ -72,6 +72,19 @@ namespace AIOrchestrator.App.Services
             }
         }
 
+        public async Task NotifyReplanTriggered(string taskId)
+        {
+            try
+            {
+                await _hubContext.Clients.All.SendAsync("ReplanTriggered", taskId);
+                _logger.LogInformation("Replan triggered notification sent for task {TaskId}", taskId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to notify clients of replan trigger");
+            }
+        }
+
         public async Task NotifyTaskCompleted(string taskId, bool success)
         {
             try
