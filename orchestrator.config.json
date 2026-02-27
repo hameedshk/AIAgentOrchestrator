@@ -20,5 +20,11 @@
   "Planner": {
     "MaxPlannerRetries": 2,
     "ModelName": "claude"
+  },
+  "Security": {
+    "EnableDevicePairing": true,
+    "PairingTokenExpirationMinutes": 15,
+    "RequireBearerToken": true,
+    "TokenHashAlgorithm": "SHA256"
   }
 }
