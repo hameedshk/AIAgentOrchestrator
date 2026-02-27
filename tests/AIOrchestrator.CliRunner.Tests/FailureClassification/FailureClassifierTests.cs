@@ -86,6 +86,58 @@ public class FailureClassifierTests
         failure.Retryable.Should().BeFalse();
     }
 
+    [Theory]
+    [InlineData(null, "No output for 30 seconds")]
+    [InlineData(124, "Step exceeded timeout")]
+    public void Classify_detects_Timeout_from_output(int? exitCode, string output)
+    {
+        // Act
+        var failure = _classifier.Classify(exitCode, output, null, ModelType.Claude);
+
+        // Assert
+        failure.Type.Should().Be(FailureType.Timeout);
+        failure.Retryable.Should().BeTrue("Timeout is transient and retryable");
+    }
+
+    [Theory]
+    [InlineData(1, "Expected JSON structure but got plain text")]
+    [InlineData(1, "Missing required field: 'steps' in plan output")]
+    public void Classify_detects_AgentInvalidOutput_from_output(int exitCode, string output)
+    {
+        // Act
+        var failure = _classifier.Classify(exitCode, output, null, ModelType.Claude);
+
+        // Assert
+        failure.Type.Should().Be(FailureType.AgentInvalidOutput);
+        failure.Retryable.Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(1, "DangerousCommandBlocked: rm -rf / not allowed")]
+    [InlineData(1, "Blocklist violation: sudo detected")]
+    public void Classify_detects_DangerousCommandBlocked_from_output(int exitCode, string output)
+    {
+        // Act
+        var failure = _classifier.Classify(exitCode, output, null, ModelType.Claude);
+
+        // Assert
+        failure.Type.Should().Be(FailureType.DangerousCommandBlocked);
+        failure.Retryable.Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(-1, "CLI process crashed with signal 11")]
+    [InlineData(null, "Unexpected EOF from CLI process")]
+    public void Classify_detects_CliCrash_from_output(int? exitCode, string output)
+    {
+        // Act
+        var failure = _classifier.Classify(exitCode, output, null, ModelType.Claude);
+
+        // Assert
+        failure.Type.Should().Be(FailureType.CliCrash);
+        failure.Retryable.Should().BeTrue("CLI crash is transient and retryable");
+    }
+
     [Fact]
     public void Classify_includes_model_identity_for_diagnostics()
     {
