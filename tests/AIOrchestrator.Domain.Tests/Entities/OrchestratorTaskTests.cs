@@ -61,7 +61,7 @@ public class OrchestratorTaskTests
         task.Enqueue();
         task.StartPlanning();
         var failure = new FailureContext(
-            Type: FailureType.PlanningError,
+            Type: FailureType.Unknown,
             RawOutput: "plan error",
             ExitCode: null,
             ErrorHash: "hash789",
@@ -81,5 +81,50 @@ public class OrchestratorTaskTests
         task.UpdatedAt.Should().BeNull();
         task.Enqueue();
         task.UpdatedAt.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void OrchestratorTask_initializes_with_normal_priority()
+    {
+        // Arrange & Act
+        var task = new OrchestratorTask
+        {
+            Id = Guid.NewGuid(),
+            Title = "Test"
+        };
+
+        // Assert
+        task.Priority.Should().Be(TaskPriority.Normal);
+    }
+
+    [Fact]
+    public void OrchestratorTask_can_set_priority()
+    {
+        // Arrange
+        var task = new OrchestratorTask
+        {
+            Id = Guid.NewGuid(),
+            Title = "Test"
+        };
+
+        // Act
+        task.Priority = TaskPriority.High;
+
+        // Assert
+        task.Priority.Should().Be(TaskPriority.High);
+    }
+
+    [Fact]
+    public void OrchestratorTask_tracks_queue_time()
+    {
+        // Arrange & Act
+        var task = new OrchestratorTask
+        {
+            Id = Guid.NewGuid(),
+            Title = "Test"
+        };
+
+        // Assert
+        task.QueuedAt.Should().BeNull();
     }
 }

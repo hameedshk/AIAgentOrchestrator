@@ -29,9 +29,24 @@ public sealed class OrchestratorTask
     /// </summary>
     public int ReplanAttempts { get; set; } = 0;
 
+    /// <summary>
+    /// Task priority level for scheduler (High > Normal > Low).
+    /// Used by scheduler for priority queue ordering.
+    /// </summary>
+    public TaskPriority Priority { get; set; } = TaskPriority.Normal;
+
+    /// <summary>
+    /// When task was queued (Queued state entered). Used for aging algorithm.
+    /// </summary>
+    public DateTimeOffset? QueuedAt { get; set; }
+
     private readonly List<ExecutionStep> _steps = [];
 
-    public void Enqueue()                    => Transition(TaskState.Queued);
+    public void Enqueue()
+    {
+        QueuedAt = DateTimeOffset.UtcNow;
+        Transition(TaskState.Queued);
+    }
     public void StartPlanning()              => Transition(TaskState.Planning);
     public void StartExecuting()             => Transition(TaskState.Executing);
     public void RequestUserFix(FailureContext f) { LastFailure = f; Transition(TaskState.AwaitingUserFix); }
@@ -52,6 +67,15 @@ public sealed class OrchestratorTask
     {
         LastFailure = failure;
         Transition(TaskState.Failed);
+    }
+
+    /// <summary>
+    /// Appends revised plan steps during re-planning without state transition.
+    /// Used by ReplanningOrchestrator to add steps to ongoing execution.
+    /// </summary>
+    public void AppendRevisionPlanSteps(IEnumerable<ExecutionStep> revisedSteps)
+    {
+        _steps.AddRange(revisedSteps);
     }
 
     private void Transition(TaskState next)
