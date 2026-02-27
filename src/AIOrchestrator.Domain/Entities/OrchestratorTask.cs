@@ -16,6 +16,17 @@ public sealed class OrchestratorTask
     public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedAt { get; private set; }
 
+    /// <summary>
+    /// Spec Section 4.5: When true, triggers Planner re-invocation on non-retryable Executor failures.
+    /// </summary>
+    public bool AllowReplan { get; set; } = false;
+
+    /// <summary>
+    /// Tracks how many times this task has been re-planned (reset per original task).
+    /// Used to enforce max replan attempts (default 3).
+    /// </summary>
+    public int ReplanAttempts { get; set; } = 0;
+
     private readonly List<ExecutionStep> _steps = [];
 
     public void Enqueue()                    => Transition(TaskState.Queued);
