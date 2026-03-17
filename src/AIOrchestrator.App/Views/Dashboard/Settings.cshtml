@@ -52,12 +52,18 @@
 <script>
 document.getElementById('settings-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        alert('Set localStorage token first (key: token).');
+        return;
+    }
 
     try {
         const response = await fetch('/api/engine/set-mode', {
             method: 'POST',
             headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                'Authorization': 'Bearer ' + token,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -66,7 +72,11 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
         });
 
         if (response.ok) {
-            alert('Settings saved successfully');
+            const data = await response.json();
+            alert('Settings saved: mode = ' + data.mode);
+        } else {
+            const errorText = await response.text();
+            alert('Failed to save settings: ' + errorText);
         }
     } catch (error) {
         alert('Failed to save settings: ' + error);

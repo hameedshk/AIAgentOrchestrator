@@ -44,6 +44,15 @@
         </div>
     </div>
 
+    <script>
+    (() => {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
+        if (token) {
+            localStorage.setItem('token', token);
+        }
+    })();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@latest/signalr.min.js"></script>
     <script src="~/js/dashboard.js"></script>

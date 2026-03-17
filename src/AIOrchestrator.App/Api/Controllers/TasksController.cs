@@ -28,13 +28,18 @@ public class TasksController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TaskResponse>> SubmitTask([FromBody] SubmitTaskRequest request)
     {
+        if (!Enum.TryParse<TaskPriority>(request.Priority, ignoreCase: true, out var priority))
+        {
+            return BadRequest(new { error = "Invalid priority. Allowed values: Low, Normal, High" });
+        }
+
         var task = new OrchestratorTask
         {
             Id = Guid.NewGuid(),
             Title = request.Title,
             Description = request.Description,
             ProjectId = request.ProjectId,
-            Priority = Enum.Parse<TaskPriority>(request.Priority),
+            Priority = priority,
             AllowReplan = request.AllowReplan
         };
 
@@ -51,8 +56,15 @@ public class TasksController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<TaskResponse>> GetTask(Guid id)
     {
-        var allTasks = await _engine.GetTasksByStateAsync(TaskState.Queued);
-        var task = allTasks.FirstOrDefault(t => t.Id == id);
+        OrchestratorTask? task = null;
+
+        foreach (var state in Enum.GetValues<TaskState>())
+        {
+            var tasks = await _engine.GetTasksByStateAsync(state);
+            task = tasks.FirstOrDefault(t => t.Id == id);
+            if (task != null)
+                break;
+        }
 
         if (task == null)
             return NotFound();
@@ -67,9 +79,15 @@ public class TasksController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TaskResponse>>> GetTasks([FromQuery] string? state = null)
     {
-        TaskState taskState = string.IsNullOrEmpty(state)
-            ? TaskState.Queued
-            : Enum.Parse<TaskState>(state);
+        TaskState taskState;
+        if (string.IsNullOrEmpty(state))
+        {
+            taskState = TaskState.Queued;
+        }
+        else if (!Enum.TryParse<TaskState>(state, ignoreCase: true, out taskState))
+        {
+            return BadRequest(new { error = "Invalid task state." });
+        }
 
         var tasks = await _engine.GetTasksByStateAsync(taskState);
         var responses = tasks.Select(MapToResponse).ToList();
@@ -107,10 +125,13 @@ public class TasksController : ControllerBase
         return new TaskResponse
         {
             Id = task.Id,
+            TaskId = task.Id,
             Title = task.Title,
             State = task.State.ToString(),
             ProjectId = task.ProjectId,
             Priority = task.Priority.ToString(),
+            Planner = task.Planner.ToString(),
+            Executor = task.Executor.ToString(),
             CurrentStepIndex = task.CurrentStepIndex,
             CreatedAt = task.CreatedAt,
             UpdatedAt = task.UpdatedAt

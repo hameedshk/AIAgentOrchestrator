@@ -19,6 +19,7 @@ public static class EngineServiceCollectionExtensions
             new Engine.Engine(
                 sp.GetRequiredService<IScheduler>(),
                 sp.GetRequiredService<IResourceMonitor>()));
+        services.AddHostedService<EngineBackgroundService>();
 
         return services;
     }

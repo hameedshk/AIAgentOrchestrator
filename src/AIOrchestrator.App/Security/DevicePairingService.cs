@@ -19,6 +19,8 @@ namespace AIOrchestrator.App.Security
         private readonly ISystemClock _clock;
         private readonly ILogger<DevicePairingService>? _logger;
 
+        public int TokenExpirationMinutes => _tokenExpirationMinutes;
+
         /// <summary>
         /// Initializes a new instance of the DevicePairingService.
         /// </summary>

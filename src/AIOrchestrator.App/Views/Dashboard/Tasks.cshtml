@@ -35,26 +35,42 @@
 
 <script>
 async function loadTasks() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.warn('No bearer token found in localStorage.');
+        return;
+    }
+
     try {
         const response = await fetch('/api/tasks', {
             headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
+                'Authorization': 'Bearer ' + token
             }
         });
+
+        if (!response.ok) {
+            throw new Error('Task list request failed with HTTP ' + response.status);
+        }
+
         const tasks = await response.json();
 
         const table = document.getElementById('tasks-table');
+        if (!tasks || tasks.length === 0) {
+            table.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #999;">No tasks found.</td></tr>';
+            return;
+        }
+
         table.innerHTML = tasks.map(task => `
             <tr>
-                <td><code style="background: #f5f5f5; padding: 2px 4px;">${task.taskId.substring(0, 8)}</code></td>
+                <td><code style="background: #f5f5f5; padding: 2px 4px;">${String(task.taskId || task.id).substring(0, 8)}</code></td>
                 <td>${task.title}</td>
                 <td>${task.projectId}</td>
                 <td><span class="status-badge status-${task.state.toLowerCase()}">${task.state}</span></td>
                 <td>${task.priority}</td>
-                <td>${task.planner}</td>
-                <td>${task.executor}</td>
+                <td>${task.planner || '--'}</td>
+                <td>${task.executor || '--'}</td>
                 <td>${new Date(task.createdAt).toLocaleDateString()}</td>
-                <td><a href="/dashboard/tasks/${task.taskId}">View</a></td>
+                <td><a href="/dashboard/tasks/${task.taskId || task.id}">View</a></td>
             </tr>
         `).join('');
     } catch (error) {
@@ -65,6 +81,42 @@ async function loadTasks() {
 document.addEventListener('DOMContentLoaded', loadTasks);
 
 function showCreateTaskDialog() {
-    alert('Create task dialog not yet implemented');
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('Set localStorage token first (key: token).');
+        return;
+    }
+
+    const title = prompt('Task title:');
+    if (!title) return;
+
+    const description = prompt('Task description:', '') || '';
+    const projectId = prompt('Project ID:', 'default-project') || 'default-project';
+    const priority = (prompt('Priority (Low/Normal/High):', 'Normal') || 'Normal');
+
+    fetch('/api/tasks', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            title,
+            description,
+            projectId,
+            priority,
+            allowReplan: false
+        })
+    })
+    .then(async response => {
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || ('HTTP ' + response.status));
+        }
+        await loadTasks();
+    })
+    .catch(error => {
+        alert('Failed to create task: ' + error.message);
+    });
 }
 </script>

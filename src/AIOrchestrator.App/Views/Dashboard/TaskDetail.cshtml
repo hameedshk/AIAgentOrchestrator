@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = ViewData["Title"] ?? "Task Details";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+    var taskId = ViewData["TaskId"]?.ToString() ?? "--";
+}
+
+<div class="card">
+    <div class="card-header">Task Details</div>
+    <div style="padding: 12px 0;">
+        <p><strong>Task ID:</strong> <code>@taskId</code></p>
+        <p>This detail page is a placeholder for richer step/execution history.</p>
+    </div>
+</div>

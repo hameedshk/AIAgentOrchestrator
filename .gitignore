@@ -39,3 +39,5 @@ bld/
 # Rider
 .idea/
 *.sln.iml
+.dotnet_cli/*
+.dotnet_cli\*

@@ -32,7 +32,10 @@ namespace AIOrchestrator.App.Security
             // Skip auth for health check endpoints
             if (context.Request.Path.StartsWithSegments("/health") ||
                 context.Request.Path.StartsWithSegments("/api/health") ||
-                context.Request.Path.StartsWithSegments("/status"))
+                context.Request.Path.StartsWithSegments("/status") ||
+                context.Request.Path == "/" ||
+                context.Request.Path.StartsWithSegments("/dashboard") ||
+                context.Request.Path.StartsWithSegments("/api/security/pairing/complete"))
             {
                 await _next(context);
                 return;
